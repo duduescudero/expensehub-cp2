@@ -8,7 +8,15 @@ namespace ExpenseHub.Api.Services;
 
 internal static class ExpenseRules
 {
-    public static string Actor(ClaimsPrincipal user) => user.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new BusinessException(401, "Identidade ausente.");
+    public static string Actor(ClaimsPrincipal user)
+    {
+        if (user.Identity?.IsAuthenticated != true)
+        {
+            throw new BusinessException(401, "Identidade não autenticada.");
+        }
+
+        return user.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new BusinessException(401, "Identidade ausente.");
+    }
 
     public static void RequireRole(ClaimsPrincipal user, string role)
     {
