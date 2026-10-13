@@ -8,18 +8,21 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ExpenseHub.Api.Controllers;
 
+/// <summary>Cadastro e autenticação bearer.</summary>
 [ApiController]
 public sealed class AuthController : ControllerBase
 {
     private readonly UserManager<AppUser> _users;
     private readonly SignInManager<AppUser> _signIn;
 
+    /// <summary>Cadastro e autenticação bearer.</summary>
     public AuthController(UserManager<AppUser> users, SignInManager<AppUser> signIn)
     {
         _users = users;
         _signIn = signIn;
     }
 
+    /// <summary>Cria um usuário sem conceder roles.</summary>
     [AllowAnonymous]
     [HttpPost("/register")]
     public async Task<IActionResult> Register(RegisterRequest request)
@@ -34,6 +37,7 @@ public sealed class AuthController : ControllerBase
         return StatusCode(201, new { user.Id, user.Email });
     }
 
+    /// <summary>Emite token bearer após validar credenciais.</summary>
     [AllowAnonymous]
     [HttpPost("/login")]
     public async Task<IActionResult> Login(LoginRequest request)
