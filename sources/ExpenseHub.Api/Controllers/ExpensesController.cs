@@ -42,6 +42,10 @@ public sealed class ExpensesController : ControllerBase
     [Authorize(Roles = "Employee,Approver,Finance,Auditor")]
     public async Task<IActionResult> Detail(Guid id) => Ok(await _service.DetailAsync(id, User, HttpContext.RequestAborted));
 
+    /// <summary>Consulta histórico autorizado do reembolso.</summary>
+    [HttpGet("{id:guid}/history")]
+    [Authorize(Roles = "Employee,Approver,Finance,Auditor")]
+    public async Task<IActionResult> History(Guid id) => Ok(await _service.HistoryAsync(id, User, HttpContext.RequestAborted));
 
     /// <summary>Envia rascunho próprio para análise.</summary>
     [HttpPost("{id:guid}/submit")]
@@ -58,4 +62,8 @@ public sealed class ExpensesController : ControllerBase
     [Authorize(Roles = Roles.Approver)]
     public async Task<IActionResult> Reject(Guid id, RejectRequest input) => Ok(await _service.DecideAsync(id, User, true, input.Reason, HttpContext.RequestAborted));
 
+    /// <summary>Registra pagamento simulado de reembolso aprovado.</summary>
+    [HttpPost("{id:guid}/pay")]
+    [Authorize(Roles = Roles.Finance)]
+    public async Task<IActionResult> Pay(Guid id) => Ok(await _service.PayAsync(id, User, HttpContext.RequestAborted));
 }
