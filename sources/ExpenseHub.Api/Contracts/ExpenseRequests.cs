@@ -29,4 +29,3 @@ public sealed class RejectRequest
     [StringLength(500, MinimumLength = 10)]
     public string Reason { get; set; } = string.Empty;
 }
-

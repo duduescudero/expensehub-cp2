@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Security.Claims;
 using ExpenseHub.Api.Contracts;
 using ExpenseHub.Api.Domain;
@@ -13,7 +16,7 @@ public sealed class ExpenseRulesTests
 {
     private static readonly DateTimeOffset _now = new(2026, 10, 13, 12, 0, 0, TimeSpan.Zero);
 
-    /// <summary>Estados incompatÃ­veis impedem aprovaÃ§Ã£o e nÃ£o alteram histÃ³rico.</summary>
+    /// <summary>Estados incompatÃƒÂ­veis impedem aprovaÃƒÂ§ÃƒÂ£o e nÃƒÂ£o alteram histÃƒÂ³rico.</summary>
     [TestMethod]
     [DataRow(0)]
     [DataRow(2)]
@@ -28,7 +31,7 @@ public sealed class ExpenseRulesTests
         Assert.IsEmpty(expense.History);
     }
 
-    /// <summary>Aprovar registra ator, instante e transiÃ§Ã£o e rejeita repetiÃ§Ã£o.</summary>
+    /// <summary>Aprovar registra ator, instante e transiÃƒÂ§ÃƒÂ£o e rejeita repetiÃƒÂ§ÃƒÂ£o.</summary>
     [TestMethod]
     public void ApprovalRecordsHistoryAndRejectsRepeatedDecision()
     {
@@ -45,14 +48,14 @@ public sealed class ExpenseRulesTests
         Assert.HasCount(1, expense.History);
     }
 
-    /// <summary>ProprietÃ¡rio nÃ£o decide mesmo acumulando roles.</summary>
+    /// <summary>ProprietÃƒÂ¡rio nÃƒÂ£o decide mesmo acumulando roles.</summary>
     [TestMethod]
     [DataRow(false)]
     [DataRow(true)]
     public void OwnerCannotApproveOrReject(bool reject)
     {
         var expense = Expense(ExpenseState.Submitted);
-        Assert.AreEqual(403, Assert.Throws<BusinessException>(() => ExpenseRules.Decide(expense, User("owner", Roles.Employee, Roles.Approver), reject, "Justificativa vÃ¡lida", _now)).StatusCode);
+        Assert.AreEqual(403, Assert.Throws<BusinessException>(() => ExpenseRules.Decide(expense, User("owner", Roles.Employee, Roles.Approver), reject, "Justificativa vÃƒÂ¡lida", _now)).StatusCode);
         Assert.IsEmpty(expense.History);
     }
 
@@ -67,7 +70,7 @@ public sealed class ExpenseRulesTests
         Assert.AreEqual(403, Assert.Throws<BusinessException>(() => ExpenseRules.Decide(Expense(ExpenseState.Submitted), User("other", role), false, null, _now)).StatusCode);
     }
 
-    /// <summary>Justificativas fora dos limites sÃ£o rejeitadas.</summary>
+    /// <summary>Justificativas fora dos limites sÃƒÂ£o rejeitadas.</summary>
     [TestMethod]
     [DataRow(0)]
     [DataRow(9)]
@@ -80,7 +83,7 @@ public sealed class ExpenseRulesTests
         Assert.IsEmpty(expense.History);
     }
 
-    /// <summary>ReprovaÃ§Ã£o persiste justificativa e estado final.</summary>
+    /// <summary>ReprovaÃƒÂ§ÃƒÂ£o persiste justificativa e estado final.</summary>
     [TestMethod]
     [DataRow(10)]
     [DataRow(500)]
@@ -93,7 +96,7 @@ public sealed class ExpenseRulesTests
         Assert.AreEqual(reason, expense.History[0].Reason);
     }
 
-    /// <summary>Pagamento cria registro consistente e nÃ£o pode ser repetido.</summary>
+    /// <summary>Pagamento cria registro consistente e nÃƒÂ£o pode ser repetido.</summary>
     [TestMethod]
     public void PaymentRecordsServerValuesAndRejectsDuplicates()
     {
@@ -110,7 +113,7 @@ public sealed class ExpenseRulesTests
         Assert.HasCount(1, expense.History);
     }
 
-    /// <summary>ProprietÃ¡rio com Finance nÃ£o paga a prÃ³pria despesa.</summary>
+    /// <summary>ProprietÃƒÂ¡rio com Finance nÃƒÂ£o paga a prÃƒÂ³pria despesa.</summary>
     [TestMethod]
     public void OwnerCannotPay()
     {
@@ -131,7 +134,7 @@ public sealed class ExpenseRulesTests
         Assert.AreEqual(409, Assert.Throws<BusinessException>(() => ExpenseRules.Pay(Expense((ExpenseState)state), User("finance", Roles.Finance), _now)).StatusCode);
     }
 
-    /// <summary>Somente proprietÃ¡rio Employee edita ou envia Draft.</summary>
+    /// <summary>Somente proprietÃƒÂ¡rio Employee edita ou envia Draft.</summary>
     [TestMethod]
     public void DraftOwnershipIsRequired()
     {
@@ -143,7 +146,7 @@ public sealed class ExpenseRulesTests
         Assert.AreEqual(409, Assert.Throws<BusinessException>(() => ExpenseRules.RequireOwnerDraft(expense, User("owner", Roles.Employee))).StatusCode);
     }
 
-    /// <summary>Filtro Employee isola proprietÃ¡rios; Admin nÃ£o possui acesso implÃ­cito.</summary>
+    /// <summary>Filtro Employee isola proprietÃƒÂ¡rios; Admin nÃƒÂ£o possui acesso implÃƒÂ­cito.</summary>
     [TestMethod]
     public void EmployeeVisibilityAndAdminRestrictions()
     {
@@ -183,7 +186,7 @@ public sealed class ExpenseRulesTests
         Assert.IsTrue(filter(expense));
     }
 
-    /// <summary>Limites de valor e data futura sÃ£o validados.</summary>
+    /// <summary>Limites de valor e data futura sÃƒÂ£o validados.</summary>
     [TestMethod]
     public void AmountAndDateValidation()
     {
@@ -201,7 +204,7 @@ public sealed class ExpenseRulesTests
         Assert.Throws<BusinessException>(() => ExpenseRules.Validate(input, new DateOnly(2026, 10, 13)));
     }
 
-    /// <summary>DescriÃ§Ã£o vazia ou fora dos limites Ã© invÃ¡lida.</summary>
+    /// <summary>DescriÃƒÂ§ÃƒÂ£o vazia ou fora dos limites ÃƒÂ© invÃƒÂ¡lida.</summary>
     [TestMethod]
     [DataRow(0)]
     [DataRow(9)]
@@ -210,6 +213,49 @@ public sealed class ExpenseRulesTests
     {
         var input = new ExpenseRequest { Description = new string('x', length), Amount = 1, ExpenseDate = new DateOnly(2026, 10, 13), CategoryId = 1 };
         Assert.Throws<BusinessException>(() => ExpenseRules.Validate(input, input.ExpenseDate));
+    }
+
+    /// <summary>Perfis sem Finance não registram pagamentos.</summary>
+    [TestMethod]
+    [DataRow("Employee")]
+    [DataRow("Approver")]
+    [DataRow("Auditor")]
+    [DataRow("Admin")]
+    public void PaymentRequiresFinanceRole(string role)
+    {
+        var expense = Expense(ExpenseState.Approved);
+        Assert.AreEqual(403, Assert.Throws<BusinessException>(() => ExpenseRules.Pay(expense, User("other", role), _now)).StatusCode);
+        Assert.IsNull(expense.Payment);
+        Assert.IsEmpty(expense.History);
+    }
+
+    /// <summary>Identidade não autenticada não consulta reembolsos.</summary>
+    [TestMethod]
+    public void AnonymousIdentityIsRejected()
+    {
+        Assert.AreEqual(401, Assert.Throws<BusinessException>(() => ExpenseRules.Visibility(new ClaimsPrincipal(new ClaimsIdentity()))).StatusCode);
+    }
+
+    /// <summary>Os limites decimais declarativos não dependem da cultura do Windows.</summary>
+    [TestMethod]
+    [DataRow("pt-BR")]
+    [DataRow("en-US")]
+    public void DeclarativeDecimalRangeIsCultureIndependent(string culture)
+    {
+        CultureInfo previous = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo(culture);
+            var input = new ExpenseRequest { Description = "Despesa de transporte", Amount = 0.01m, ExpenseDate = new DateOnly(2026, 10, 13), CategoryId = 1 };
+            var errors = new List<ValidationResult>();
+            Assert.IsTrue(Validator.TryValidateObject(input, new ValidationContext(input), errors, true));
+            input.Amount = 0;
+            Assert.IsFalse(Validator.TryValidateObject(input, new ValidationContext(input), errors, true));
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = previous;
+        }
     }
 
     private static Expense Expense(ExpenseState state) => new() { OwnerId = "owner", State = state, Amount = 125.50m };
@@ -226,4 +272,3 @@ public sealed class ExpenseRulesTests
         return new ClaimsPrincipal(identity);
     }
 }
-
