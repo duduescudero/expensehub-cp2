@@ -16,7 +16,7 @@ public sealed class ExpenseRulesTests
 {
     private static readonly DateTimeOffset _now = new(2026, 10, 13, 12, 0, 0, TimeSpan.Zero);
 
-    /// <summary>Estados incompatÃƒÂ­veis impedem aprovaÃƒÂ§ÃƒÂ£o e nÃƒÂ£o alteram histÃƒÂ³rico.</summary>
+    /// <summary>Estados incompatíveis impedem aprovação e não alteram histórico.</summary>
     [TestMethod]
     [DataRow(0)]
     [DataRow(2)]
@@ -31,7 +31,7 @@ public sealed class ExpenseRulesTests
         Assert.IsEmpty(expense.History);
     }
 
-    /// <summary>Aprovar registra ator, instante e transiÃƒÂ§ÃƒÂ£o e rejeita repetiÃƒÂ§ÃƒÂ£o.</summary>
+    /// <summary>Aprovar registra ator, instante e transição e rejeita repetição.</summary>
     [TestMethod]
     public void ApprovalRecordsHistoryAndRejectsRepeatedDecision()
     {
@@ -48,14 +48,14 @@ public sealed class ExpenseRulesTests
         Assert.HasCount(1, expense.History);
     }
 
-    /// <summary>ProprietÃƒÂ¡rio nÃƒÂ£o decide mesmo acumulando roles.</summary>
+    /// <summary>Proprietário não decide mesmo acumulando roles.</summary>
     [TestMethod]
     [DataRow(false)]
     [DataRow(true)]
     public void OwnerCannotApproveOrReject(bool reject)
     {
         var expense = Expense(ExpenseState.Submitted);
-        Assert.AreEqual(403, Assert.Throws<BusinessException>(() => ExpenseRules.Decide(expense, User("owner", Roles.Employee, Roles.Approver), reject, "Justificativa vÃƒÂ¡lida", _now)).StatusCode);
+        Assert.AreEqual(403, Assert.Throws<BusinessException>(() => ExpenseRules.Decide(expense, User("owner", Roles.Employee, Roles.Approver), reject, "Justificativa válida", _now)).StatusCode);
         Assert.IsEmpty(expense.History);
     }
 
@@ -70,7 +70,7 @@ public sealed class ExpenseRulesTests
         Assert.AreEqual(403, Assert.Throws<BusinessException>(() => ExpenseRules.Decide(Expense(ExpenseState.Submitted), User("other", role), false, null, _now)).StatusCode);
     }
 
-    /// <summary>Justificativas fora dos limites sÃƒÂ£o rejeitadas.</summary>
+    /// <summary>Justificativas fora dos limites são rejeitadas.</summary>
     [TestMethod]
     [DataRow(0)]
     [DataRow(9)]
@@ -83,7 +83,7 @@ public sealed class ExpenseRulesTests
         Assert.IsEmpty(expense.History);
     }
 
-    /// <summary>ReprovaÃƒÂ§ÃƒÂ£o persiste justificativa e estado final.</summary>
+    /// <summary>Reprovação persiste justificativa e estado final.</summary>
     [TestMethod]
     [DataRow(10)]
     [DataRow(500)]
@@ -96,7 +96,7 @@ public sealed class ExpenseRulesTests
         Assert.AreEqual(reason, expense.History[0].Reason);
     }
 
-    /// <summary>Pagamento cria registro consistente e nÃƒÂ£o pode ser repetido.</summary>
+    /// <summary>Pagamento cria registro consistente e não pode ser repetido.</summary>
     [TestMethod]
     public void PaymentRecordsServerValuesAndRejectsDuplicates()
     {
@@ -113,7 +113,7 @@ public sealed class ExpenseRulesTests
         Assert.HasCount(1, expense.History);
     }
 
-    /// <summary>ProprietÃƒÂ¡rio com Finance nÃƒÂ£o paga a prÃƒÂ³pria despesa.</summary>
+    /// <summary>Proprietário com Finance não paga a própria despesa.</summary>
     [TestMethod]
     public void OwnerCannotPay()
     {
@@ -134,7 +134,7 @@ public sealed class ExpenseRulesTests
         Assert.AreEqual(409, Assert.Throws<BusinessException>(() => ExpenseRules.Pay(Expense((ExpenseState)state), User("finance", Roles.Finance), _now)).StatusCode);
     }
 
-    /// <summary>Somente proprietÃƒÂ¡rio Employee edita ou envia Draft.</summary>
+    /// <summary>Somente proprietário Employee edita ou envia Draft.</summary>
     [TestMethod]
     public void DraftOwnershipIsRequired()
     {
@@ -146,7 +146,7 @@ public sealed class ExpenseRulesTests
         Assert.AreEqual(409, Assert.Throws<BusinessException>(() => ExpenseRules.RequireOwnerDraft(expense, User("owner", Roles.Employee))).StatusCode);
     }
 
-    /// <summary>Filtro Employee isola proprietÃƒÂ¡rios; Admin nÃƒÂ£o possui acesso implÃƒÂ­cito.</summary>
+    /// <summary>Filtro Employee isola proprietários; Admin não possui acesso implícito.</summary>
     [TestMethod]
     public void EmployeeVisibilityAndAdminRestrictions()
     {
@@ -186,7 +186,7 @@ public sealed class ExpenseRulesTests
         Assert.IsTrue(filter(expense));
     }
 
-    /// <summary>Limites de valor e data futura sÃƒÂ£o validados.</summary>
+    /// <summary>Limites de valor e data futura são validados.</summary>
     [TestMethod]
     public void AmountAndDateValidation()
     {
@@ -204,7 +204,7 @@ public sealed class ExpenseRulesTests
         Assert.Throws<BusinessException>(() => ExpenseRules.Validate(input, new DateOnly(2026, 10, 13)));
     }
 
-    /// <summary>DescriÃƒÂ§ÃƒÂ£o vazia ou fora dos limites ÃƒÂ© invÃƒÂ¡lida.</summary>
+    /// <summary>Descrição vazia ou fora dos limites é inválida.</summary>
     [TestMethod]
     [DataRow(0)]
     [DataRow(9)]
