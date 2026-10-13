@@ -11,7 +11,7 @@ namespace ExpenseHub.UnitTests;
 [TestClass]
 public sealed class ExpenseRulesTests
 {
-    private static readonly DateTimeOffset Now = new(2026, 10, 13, 12, 0, 0, TimeSpan.Zero);
+    private static readonly DateTimeOffset _now = new(2026, 10, 13, 12, 0, 0, TimeSpan.Zero);
 
     /// <summary>Estados incompatÃ­veis impedem aprovaÃ§Ã£o e nÃ£o alteram histÃ³rico.</summary>
     [TestMethod]
@@ -22,7 +22,7 @@ public sealed class ExpenseRulesTests
     public void ApprovalRejectsInvalidState(int state)
     {
         var expense = Expense((ExpenseState)state);
-        BusinessException error = Assert.Throws<BusinessException>(() => ExpenseRules.Decide(expense, User("approver", Roles.Approver), false, null, Now));
+        BusinessException error = Assert.Throws<BusinessException>(() => ExpenseRules.Decide(expense, User("approver", Roles.Approver), false, null, _now));
         Assert.AreEqual(409, error.StatusCode);
         Assert.AreEqual((ExpenseState)state, expense.State);
         Assert.IsEmpty(expense.History);
@@ -34,14 +34,14 @@ public sealed class ExpenseRulesTests
     {
         var expense = Expense(ExpenseState.Submitted);
         ClaimsPrincipal actor = User("approver", Roles.Approver);
-        ExpenseRules.Decide(expense, actor, false, null, Now);
+        ExpenseRules.Decide(expense, actor, false, null, _now);
         Assert.AreEqual(ExpenseState.Approved, expense.State);
         Assert.HasCount(1, expense.History);
         Assert.AreEqual("approver", expense.History[0].ActorId);
-        Assert.AreEqual(Now, expense.History[0].OccurredAt);
+        Assert.AreEqual(_now, expense.History[0].OccurredAt);
         Assert.AreEqual(ExpenseState.Submitted, expense.History[0].PreviousState);
         Assert.AreEqual(ExpenseState.Approved, expense.History[0].NextState);
-        Assert.AreEqual(409, Assert.Throws<BusinessException>(() => ExpenseRules.Decide(expense, actor, false, null, Now)).StatusCode);
+        Assert.AreEqual(409, Assert.Throws<BusinessException>(() => ExpenseRules.Decide(expense, actor, false, null, _now)).StatusCode);
         Assert.HasCount(1, expense.History);
     }
 
@@ -52,7 +52,7 @@ public sealed class ExpenseRulesTests
     public void OwnerCannotApproveOrReject(bool reject)
     {
         var expense = Expense(ExpenseState.Submitted);
-        Assert.AreEqual(403, Assert.Throws<BusinessException>(() => ExpenseRules.Decide(expense, User("owner", Roles.Employee, Roles.Approver), reject, "Justificativa vÃ¡lida", Now)).StatusCode);
+        Assert.AreEqual(403, Assert.Throws<BusinessException>(() => ExpenseRules.Decide(expense, User("owner", Roles.Employee, Roles.Approver), reject, "Justificativa vÃ¡lida", _now)).StatusCode);
         Assert.IsEmpty(expense.History);
     }
 
@@ -64,7 +64,7 @@ public sealed class ExpenseRulesTests
     [DataRow("Admin")]
     public void WrongRoleCannotDecide(string role)
     {
-        Assert.AreEqual(403, Assert.Throws<BusinessException>(() => ExpenseRules.Decide(Expense(ExpenseState.Submitted), User("other", role), false, null, Now)).StatusCode);
+        Assert.AreEqual(403, Assert.Throws<BusinessException>(() => ExpenseRules.Decide(Expense(ExpenseState.Submitted), User("other", role), false, null, _now)).StatusCode);
     }
 
     /// <summary>Justificativas fora dos limites sÃ£o rejeitadas.</summary>
@@ -75,7 +75,7 @@ public sealed class ExpenseRulesTests
     public void RejectionRequiresValidReason(int length)
     {
         var expense = Expense(ExpenseState.Submitted);
-        Assert.AreEqual(400, Assert.Throws<BusinessException>(() => ExpenseRules.Decide(expense, User("approver", Roles.Approver), true, new string('x', length), Now)).StatusCode);
+        Assert.AreEqual(400, Assert.Throws<BusinessException>(() => ExpenseRules.Decide(expense, User("approver", Roles.Approver), true, new string('x', length), _now)).StatusCode);
         Assert.AreEqual(ExpenseState.Submitted, expense.State);
         Assert.IsEmpty(expense.History);
     }
@@ -88,7 +88,7 @@ public sealed class ExpenseRulesTests
     {
         var expense = Expense(ExpenseState.Submitted);
         string reason = new('x', length);
-        ExpenseRules.Decide(expense, User("approver", Roles.Approver), true, reason, Now);
+        ExpenseRules.Decide(expense, User("approver", Roles.Approver), true, reason, _now);
         Assert.AreEqual(ExpenseState.Rejected, expense.State);
         Assert.AreEqual(reason, expense.History[0].Reason);
     }
@@ -99,14 +99,14 @@ public sealed class ExpenseRulesTests
     {
         var expense = Expense(ExpenseState.Approved);
         ClaimsPrincipal finance = User("finance", Roles.Finance);
-        ExpenseRules.Pay(expense, finance, Now);
+        ExpenseRules.Pay(expense, finance, _now);
         Assert.AreEqual(ExpenseState.Paid, expense.State);
         Assert.IsNotNull(expense.Payment);
         Assert.AreEqual("finance", expense.Payment.ActorId);
-        Assert.AreEqual(Now, expense.Payment.PaidAt);
+        Assert.AreEqual(_now, expense.Payment.PaidAt);
         Assert.AreEqual(expense.Amount, expense.Payment.Amount);
         Assert.AreEqual(expense.Id, expense.Payment.ExpenseId);
-        Assert.AreEqual(409, Assert.Throws<BusinessException>(() => ExpenseRules.Pay(expense, finance, Now)).StatusCode);
+        Assert.AreEqual(409, Assert.Throws<BusinessException>(() => ExpenseRules.Pay(expense, finance, _now)).StatusCode);
         Assert.HasCount(1, expense.History);
     }
 
@@ -115,7 +115,7 @@ public sealed class ExpenseRulesTests
     public void OwnerCannotPay()
     {
         var expense = Expense(ExpenseState.Approved);
-        Assert.AreEqual(403, Assert.Throws<BusinessException>(() => ExpenseRules.Pay(expense, User("owner", Roles.Employee, Roles.Finance), Now)).StatusCode);
+        Assert.AreEqual(403, Assert.Throws<BusinessException>(() => ExpenseRules.Pay(expense, User("owner", Roles.Employee, Roles.Finance), _now)).StatusCode);
         Assert.IsNull(expense.Payment);
         Assert.IsEmpty(expense.History);
     }
@@ -128,7 +128,7 @@ public sealed class ExpenseRulesTests
     [DataRow(4)]
     public void PaymentRejectsWrongState(int state)
     {
-        Assert.AreEqual(409, Assert.Throws<BusinessException>(() => ExpenseRules.Pay(Expense((ExpenseState)state), User("finance", Roles.Finance), Now)).StatusCode);
+        Assert.AreEqual(409, Assert.Throws<BusinessException>(() => ExpenseRules.Pay(Expense((ExpenseState)state), User("finance", Roles.Finance), _now)).StatusCode);
     }
 
     /// <summary>Somente proprietÃ¡rio Employee edita ou envia Draft.</summary>
@@ -226,3 +226,4 @@ public sealed class ExpenseRulesTests
         return new ClaimsPrincipal(identity);
     }
 }
+
