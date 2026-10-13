@@ -51,9 +51,19 @@ internal sealed class ExpenseService
         return expense;
     }
 
+    public async Task<List<Expense>> ListAsync(ClaimsPrincipal user, CancellationToken cancellationToken) => await _database.Expenses.AsNoTracking().Where(ExpenseRules.Visibility(user)).ToListAsync(cancellationToken);
+
+    public async Task<Expense> DetailAsync(Guid id, ClaimsPrincipal user, CancellationToken cancellationToken) => await _database.Expenses.AsNoTracking().Include(e => e.Payment).Where(ExpenseRules.Visibility(user)).FirstOrDefaultAsync(e => e.Id == id, cancellationToken) ?? throw new BusinessException(404, "Reembolso não encontrado.");
 
 
-
+    public async Task<Expense> SubmitAsync(Guid id, ClaimsPrincipal user, CancellationToken cancellationToken)
+    {
+        Expense expense = await LoadAsync(id, cancellationToken);
+        ExpenseRules.RequireOwnerDraft(expense, user);
+        ExpenseRules.Change(expense, user, ExpenseState.Submitted, "Submitted", _clock.GetUtcNow());
+        await SaveAsync(cancellationToken);
+        return expense;
+    }
 
 
 
