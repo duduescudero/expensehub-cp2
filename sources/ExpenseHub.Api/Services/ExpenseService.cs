@@ -65,6 +65,13 @@ internal sealed class ExpenseService
         return expense;
     }
 
+    public async Task<Expense> DecideAsync(Guid id, ClaimsPrincipal user, bool reject, string? reason, CancellationToken cancellationToken)
+    {
+        Expense expense = await LoadAsync(id, cancellationToken);
+        ExpenseRules.Decide(expense, user, reject, reason, _clock.GetUtcNow());
+        await SaveAsync(cancellationToken);
+        return expense;
+    }
 
 
     private async Task<Expense> LoadAsync(Guid id, CancellationToken cancellationToken) => await _database.Expenses.Include(e => e.History).Include(e => e.Payment).FirstOrDefaultAsync(e => e.Id == id, cancellationToken) ?? throw new BusinessException(404, "Reembolso não encontrado.");

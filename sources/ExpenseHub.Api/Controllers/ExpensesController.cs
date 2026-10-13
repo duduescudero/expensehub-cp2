@@ -48,6 +48,14 @@ public sealed class ExpensesController : ControllerBase
     [Authorize(Roles = Roles.Employee)]
     public async Task<IActionResult> Submit(Guid id) => Ok(await _service.SubmitAsync(id, User, HttpContext.RequestAborted));
 
+    /// <summary>Aprova reembolso enviado por outro usuário.</summary>
+    [HttpPost("{id:guid}/approve")]
+    [Authorize(Roles = Roles.Approver)]
+    public async Task<IActionResult> Approve(Guid id) => Ok(await _service.DecideAsync(id, User, false, null, HttpContext.RequestAborted));
 
+    /// <summary>Reprova reembolso enviado com justificativa válida.</summary>
+    [HttpPost("{id:guid}/reject")]
+    [Authorize(Roles = Roles.Approver)]
+    public async Task<IActionResult> Reject(Guid id, RejectRequest input) => Ok(await _service.DecideAsync(id, User, true, input.Reason, HttpContext.RequestAborted));
 
 }
