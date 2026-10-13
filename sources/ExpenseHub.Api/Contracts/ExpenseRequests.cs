@@ -11,7 +11,7 @@ public sealed class ExpenseRequest
     [StringLength(500, MinimumLength = 10)]
     public string Description { get; set; } = string.Empty;
     /// <summary>Valor do reembolso em reais.</summary>
-    [Range(typeof(decimal), "0.01", "2147483647")]
+    [Range(typeof(decimal), "0.01", "2147483647", ParseLimitsInInvariantCulture = true, ConvertValueInInvariantCulture = true)]
     public decimal Amount { get; set; }
     /// <summary>Data da despesa, que não pode ser futura.</summary>
     [Required]

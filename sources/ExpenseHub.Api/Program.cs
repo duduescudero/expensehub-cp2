@@ -1,9 +1,9 @@
 using System;
-using ExpenseHub.Api.Services;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using ExpenseHub.Api.Data;
 using ExpenseHub.Api.Domain;
+using ExpenseHub.Api.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -27,7 +27,11 @@ internal static class Program
         builder.Services.AddDbContext<ExpenseDbContext>(options => options.UseSqlite(builder.Configuration.GetConnectionString("ExpenseHub") ?? "Data Source=expensehub.db"));
         builder.Services.AddAuthentication().AddBearerToken(IdentityConstants.BearerScheme);
         builder.Services.AddAuthorization();
-        builder.Services.AddIdentityCore<AppUser>(options => options.User.RequireUniqueEmail = true)
+        builder.Services.AddIdentityCore<AppUser>(options =>
+            {
+                options.User.RequireUniqueEmail = true;
+                options.Password.RequiredLength = 8;
+            })
             .AddRoles<IdentityRole>().AddEntityFrameworkStores<ExpenseDbContext>().AddSignInManager().AddDefaultTokenProviders();
         builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
         WebApplication app = builder.Build();

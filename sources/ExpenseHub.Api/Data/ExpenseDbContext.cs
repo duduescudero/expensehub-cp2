@@ -18,6 +18,9 @@ internal sealed class ExpenseDbContext : IdentityDbContext<AppUser>
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+        builder.Entity<Expense>().Property(e => e.Id).ValueGeneratedNever();
+        builder.Entity<ExpenseHistory>().Property(e => e.Id).ValueGeneratedNever();
+        builder.Entity<PaymentRecord>().Property(e => e.Id).ValueGeneratedNever();
         builder.Entity<Expense>().Property(e => e.Description).HasMaxLength(500);
         builder.Entity<Expense>().Property(e => e.Amount).HasPrecision(18, 2);
         builder.Entity<Expense>().Property(e => e.Revision).IsConcurrencyToken();
