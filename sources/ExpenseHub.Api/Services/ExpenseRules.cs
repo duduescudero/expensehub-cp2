@@ -8,13 +8,21 @@ namespace ExpenseHub.Api.Services;
 
 internal static class ExpenseRules
 {
-    public static string Actor(ClaimsPrincipal user) => user.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new BusinessException(401, "Identidade ausente.");
+    public static string Actor(ClaimsPrincipal user)
+    {
+        if (user.Identity?.IsAuthenticated != true)
+        {
+            throw new BusinessException(401, "Identidade não autenticada.");
+        }
+
+        return user.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new BusinessException(401, "Identidade ausente.");
+    }
 
     public static void RequireRole(ClaimsPrincipal user, string role)
     {
         if (!user.IsInRole(role))
         {
-            throw new BusinessException(403, "Perfil sem permissão para esta operação.");
+            throw new BusinessException(403, "Perfil sem permissÃ£o para esta operaÃ§Ã£o.");
         }
     }
 
@@ -37,7 +45,7 @@ internal static class ExpenseRules
     {
         if (string.IsNullOrWhiteSpace(input.Description) || input.Description.Trim().Length is < 10 or > 500 || input.Amount is < 0.01m or > int.MaxValue || input.ExpenseDate == default || input.ExpenseDate > today || input.CategoryId < 1)
         {
-            throw new BusinessException(400, "Descrição, valor, data ou categoria inválidos.");
+            throw new BusinessException(400, "DescriÃ§Ã£o, valor, data ou categoria invÃ¡lidos.");
         }
     }
 
@@ -46,7 +54,7 @@ internal static class ExpenseRules
         RequireRole(user, Roles.Employee);
         if (expense.OwnerId != Actor(user))
         {
-            throw new BusinessException(403, "Somente o proprietário pode alterar ou enviar o reembolso.");
+            throw new BusinessException(403, "Somente o proprietÃ¡rio pode alterar ou enviar o reembolso.");
         }
 
         RequireState(expense, ExpenseState.Draft);
@@ -56,7 +64,7 @@ internal static class ExpenseRules
     {
         if (expense.State != expected)
         {
-            throw new BusinessException(409, "Transição incompatível com o estado atual.");
+            throw new BusinessException(409, "TransiÃ§Ã£o incompatÃ­vel com o estado atual.");
         }
     }
 
@@ -65,7 +73,7 @@ internal static class ExpenseRules
         RequireRole(user, Roles.Approver);
         if (expense.OwnerId == Actor(user))
         {
-            throw new BusinessException(403, "Autoaprovação e autorreprovação são proibidas.");
+            throw new BusinessException(403, "AutoaprovaÃ§Ã£o e autorreprovaÃ§Ã£o sÃ£o proibidas.");
         }
 
         RequireState(expense, ExpenseState.Submitted);
@@ -82,7 +90,7 @@ internal static class ExpenseRules
         RequireRole(user, Roles.Finance);
         if (expense.OwnerId == Actor(user))
         {
-            throw new BusinessException(403, "Autopagamento é proibido.");
+            throw new BusinessException(403, "Autopagamento Ã© proibido.");
         }
 
         RequireState(expense, ExpenseState.Approved);
