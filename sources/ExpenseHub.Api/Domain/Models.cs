@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace ExpenseHub.Api.Domain;
 
+/// <summary>Usuário persistido pelo ASP.NET Core Identity.</summary>
 public sealed class AppUser : IdentityUser
 {
 }

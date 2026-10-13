@@ -1,3 +1,5 @@
+using System;
+using ExpenseHub.Api.Services;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using ExpenseHub.Api.Data;
@@ -19,6 +21,9 @@ internal static class Program
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
         builder.Services.AddOpenApi();
         builder.Services.AddProblemDetails();
+        builder.Services.AddExceptionHandler<BusinessExceptionHandler>();
+        builder.Services.AddSingleton(TimeProvider.System);
+        builder.Services.AddScoped<ExpenseService>();
         builder.Services.AddDbContext<ExpenseDbContext>(options => options.UseSqlite(builder.Configuration.GetConnectionString("ExpenseHub") ?? "Data Source=expensehub.db"));
         builder.Services.AddAuthentication().AddBearerToken(IdentityConstants.BearerScheme);
         builder.Services.AddAuthorization();

@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseHub.Api.Controllers;
 
+/// <summary>Administração de usuários restrita ao perfil Admin.</summary>
 [ApiController]
 [Authorize(Roles = Roles.Admin)]
 [Route("api/admin/users")]
@@ -19,11 +20,13 @@ public sealed class AdminController : ControllerBase
 {
     private readonly UserManager<AppUser> _users;
 
+    /// <summary>Administração de usuários restrita ao perfil Admin.</summary>
     public AdminController(UserManager<AppUser> users)
     {
         _users = users;
     }
 
+    /// <summary>Lista recursos acessíveis ao perfil autenticado.</summary>
     [HttpGet]
     public async Task<IActionResult> List()
     {
@@ -37,6 +40,7 @@ public sealed class AdminController : ControllerBase
         return Ok(result);
     }
 
+    /// <summary>Atualiza roles conhecidas sem permitir remoção da própria role Admin.</summary>
     [HttpPut("{id}/roles")]
     public async Task<IActionResult> SetRoles(string id, RolesRequest request)
     {
