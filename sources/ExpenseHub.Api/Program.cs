@@ -46,8 +46,10 @@ internal static class Program
         }
 
         app.MapGet("/health", () => Results.Ok(new { status = "ok" })).WithName("GetHealth");
+        app.MapGet("/version", () => Results.Ok(new { commit = Environment.GetEnvironmentVariable("BUILD_SHA") ?? "development" }));
         app.MapControllers();
         await app.RunAsync();
     }
 }
+
 
