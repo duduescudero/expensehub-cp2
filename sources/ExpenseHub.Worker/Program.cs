@@ -60,17 +60,24 @@ internal sealed class ReportsWorker : BackgroundService
 
                     try
                     {
-                        ReportMessage message = JsonSerializer.Deserialize<ReportMessage>(delivery.Body.Span, new JsonSerializerOptions(JsonSerializerDefaults.Web)) ?? throw new JsonException();
+                        ReportMessage message = JsonSerializer.Deserialize<ReportMessage>(delivery.Body.Span, JsonSerializerOptions.Web) ?? throw new JsonException();
                         if (message.ReportId == Guid.Empty)
                         {
                             throw new JsonException();
                         }
 
                         using IServiceScope scope = _scopes.CreateScope();
-                        _logger.LogInformation("Início reportId={ReportId}", message.ReportId);
+                        if (_logger.IsEnabled(LogLevel.Information))
+                        {
+                            _logger.LogInformation("Início reportId={ReportId}", message.ReportId);
+                        }
+
                         string outcome = await scope.ServiceProvider.GetRequiredService<ReportProcessor>().ProcessAsync(message.ReportId, stoppingToken);
                         await channel.BasicAckAsync(delivery.DeliveryTag, multiple: false, stoppingToken);
-                        _logger.LogInformation("Consumo confirmado reportId={ReportId} outcome={Outcome}", message.ReportId, outcome);
+                        if (_logger.IsEnabled(LogLevel.Information))
+                        {
+                            _logger.LogInformation("Consumo confirmado reportId={ReportId} outcome={Outcome}", message.ReportId, outcome);
+                        }
                     }
                     catch (JsonException)
                     {

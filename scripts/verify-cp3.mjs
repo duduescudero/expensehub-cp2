@@ -17,7 +17,11 @@ async function request(path, token, method = 'GET', body, expected = 200) {
   const response = await fetch(base + path, { method, headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}), ...(body ? { 'Content-Type': 'application/json' } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}), signal: AbortSignal.timeout(20000) });
   assert.equal(response.status, expected, `${method} ${path}: ${response.status} != ${expected}`);
   evidence.assertions++;
-  if (response.headers.get('content-type')?.includes('json')) return await response.json();
+  if (response.headers.get('content-type')?.includes('json')) {
+    const data = await response.json();
+    if (expected === 202) assert.ok(response.headers.get('location')?.endsWith(`/api/reports/${data.id}`), '202 aponta Location para o pedido salvo');
+    return data;
+  }
   return response;
 }
 async function healthy() {
@@ -46,7 +50,7 @@ await healthy();
 const admin = (await request('/login', null, 'POST', { email: env.ADMIN_EMAIL, password: env.ADMIN_PASSWORD })).accessToken;
 async function user(name, roles) {
   const email = `${name}-${run}@example.test`;
-  await request('/register', null, 'POST', { email, password });
+  await request('/register', null, 'POST', { email, password }, 201);
   const users = await request('/api/admin/users', admin);
   const person = users.find(x => x.email === email);
   assert.ok(person, 'Usuário cadastrado encontrado');
@@ -88,7 +92,12 @@ const waiting = await request('/api/reports', a.token, 'POST', input, 202);
 assert.equal((await request(`/api/reports/${waiting.id}`, a.token)).status, 'Pending');
 await request(`/api/reports/${waiting.id}/excel`, a.token, 'GET', null, 409);
 await pause(1500);
-const queue = await broker('/queues/%2F/expensehub.reports');
+let queue;
+for (let n = 0; n < 30; n++) {
+  queue = await broker('/queues/%2F/expensehub.reports');
+  if (queue.messages_ready >= 1) break;
+  await pause(500);
+}
 assert.ok(queue.messages_ready >= 1);
 dc('up', '-d', 'worker');
 await completed(waiting.id, a.token);

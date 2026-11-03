@@ -103,9 +103,9 @@ internal static class ReportRules
         sheet.Cell("A3").Value = "Escopo";
         sheet.Cell("B3").Value = report.Scope;
         sheet.Cell("A4").Value = "Início";
-        sheet.Cell("B4").Value = report.FromDate.ToString("yyyy-MM-dd");
+        sheet.Cell("B4").Value = report.FromDate.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
         sheet.Cell("A5").Value = "Fim";
-        sheet.Cell("B5").Value = report.ToDate.ToString("yyyy-MM-dd");
+        sheet.Cell("B5").Value = report.ToDate.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
         sheet.Cell("A6").Value = "Gerado em UTC";
         sheet.Cell("B6").Value = result.GeneratedAt.ToString("O");
         sheet.Cell("A8").Value = "Estado";
