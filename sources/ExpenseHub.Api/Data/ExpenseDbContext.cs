@@ -18,6 +18,7 @@ internal sealed class ExpenseDbContext : IdentityDbContext<AppUser>
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+        builder.Entity<ExpenseHub.Reports.ReportRecord>().ToTable("Reports");
         builder.Entity<Expense>().Property(e => e.Id).ValueGeneratedNever();
         builder.Entity<ExpenseHistory>().Property(e => e.Id).ValueGeneratedNever();
         builder.Entity<PaymentRecord>().Property(e => e.Id).ValueGeneratedNever();
@@ -34,3 +35,4 @@ internal sealed class ExpenseDbContext : IdentityDbContext<AppUser>
         builder.Entity<ExpenseCategory>().HasData(new ExpenseCategory { Id = 1, Name = "Transporte" }, new ExpenseCategory { Id = 2, Name = "Alimentação" }, new ExpenseCategory { Id = 3, Name = "Hospedagem" }, new ExpenseCategory { Id = 4, Name = "Outros" });
     }
 }
+

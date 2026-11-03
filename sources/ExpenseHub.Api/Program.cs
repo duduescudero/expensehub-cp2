@@ -20,6 +20,7 @@ internal static class Program
     {
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
         builder.Services.AddOpenApi();
+        builder.Services.AddSingleton<ExpenseHub.Reports.IReportPublisher, ExpenseHub.Reports.RabbitPublisher>();
         builder.Services.AddProblemDetails();
         builder.Services.AddExceptionHandler<BusinessExceptionHandler>();
         builder.Services.AddSingleton(TimeProvider.System);
@@ -49,3 +50,4 @@ internal static class Program
         await app.RunAsync();
     }
 }
+
