@@ -1,0 +1,29 @@
+@baseUrl = http://localhost:5187
+@token = COLE_SEU_TOKEN_LOCAL_SEM_COMMITAR
+@reportId = SUBSTITUA_PELO_ID
+
+### Solicitar (Employee)
+POST {{baseUrl}}/api/reports
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"fromDate":"2026-09-01","toDate":"2026-09-30","scope":"Mine"}
+
+### Listar pedidos próprios
+GET {{baseUrl}}/api/reports
+Authorization: Bearer {{token}}
+
+### Acompanhar
+GET {{baseUrl}}/api/reports/{{reportId}}
+Authorization: Bearer {{token}}
+
+### Download
+GET {{baseUrl}}/api/reports/{{reportId}}/excel
+Authorization: Bearer {{token}}
+
+### Global (Auditor)
+POST {{baseUrl}}/api/reports
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"fromDate":"2026-09-01","toDate":"2026-09-30","scope":"Global"}
