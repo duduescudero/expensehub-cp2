@@ -51,5 +51,3 @@ internal static class Program
         await app.RunAsync();
     }
 }
-
-

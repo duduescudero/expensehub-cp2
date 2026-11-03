@@ -57,9 +57,12 @@ internal sealed class RabbitPublisher : IReportPublisher, IAsyncDisposable
 
             using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             timeout.CancelAfter(TimeSpan.FromSeconds(8));
-            byte[] body = JsonSerializer.SerializeToUtf8Bytes(new ReportMessage(id), new JsonSerializerOptions(JsonSerializerDefaults.Web));
+            byte[] body = JsonSerializer.SerializeToUtf8Bytes(new ReportMessage(id), JsonSerializerOptions.Web);
             await _channel.BasicPublishAsync(string.Empty, Queue, mandatory: true, new BasicProperties { Persistent = true, ContentType = "application/json", MessageId = id.ToString() }, body, timeout.Token);
-            _logger.LogInformation("Publicação confirmada reportId={ReportId}", id);
+            if (_logger.IsEnabled(LogLevel.Information))
+            {
+                _logger.LogInformation("Publicação confirmada reportId={ReportId}", id);
+            }
         }
         finally
         {

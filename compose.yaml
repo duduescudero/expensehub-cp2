@@ -4,7 +4,7 @@ services:
     image: rabbitmq:4-management
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBIT_USER:?Configure RABBIT_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBIT_PASSWORD:?Configure RABBIT_PASSWORD}
+      RABBITMQ_DEFAULT_PASS: "${RABBIT_PASSWORD}"
     ports:
       - "127.0.0.1:15672:15672"
     volumes:
@@ -20,10 +20,10 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__ExpenseHub: "Data Source=/data/expensehub.db;Default Timeout=30"
       Bootstrap__Email: ${ADMIN_EMAIL:?Configure ADMIN_EMAIL}
-      Bootstrap__Password: ${ADMIN_PASSWORD:?Configure ADMIN_PASSWORD}
+      Bootstrap__Password: "${ADMIN_PASSWORD:?Configure ADMIN_PASSWORD}"
       Rabbit__Host: rabbitmq
       Rabbit__User: ${RABBIT_USER}
-      Rabbit__Password: ${RABBIT_PASSWORD}
+      Rabbit__Password: "${RABBIT_PASSWORD}"
     ports:
       - "127.0.0.1:5187:8080"
     volumes:
@@ -38,7 +38,7 @@ services:
       ConnectionStrings__ExpenseHub: "Data Source=/data/expensehub.db;Default Timeout=30"
       Rabbit__Host: rabbitmq
       Rabbit__User: ${RABBIT_USER}
-      Rabbit__Password: ${RABBIT_PASSWORD}
+      Rabbit__Password: "${RABBIT_PASSWORD}"
     volumes:
       - database:/data
     depends_on:
