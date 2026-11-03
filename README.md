@@ -1,3 +1,26 @@
+# ExpenseHub — CP3: relatórios em segundo plano
+
+**Eduardo Pires Escudero — RM 556527 — entrega individual.**
+
+Evolução da CP2 com RabbitMQ, worker C#, relatórios persistidos por período e exportação Excel. API ASP.NET Core 10, Identity, EF Core, SQLite compartilhado e testes MSTest. Implementação assistida por Codex, conforme autorização da atividade.
+
+- **[Execução, contrato, critérios e experimentos](docs/CP3.md)**
+- **[Chamadas HTTP](docs/reports.http)**
+- **[Publicação das imagens após os testes](../../actions/workflows/cp3-images.yml)**
+- **[Imagem web](https://github.com/duduescudero/expensehub-cp2/pkgs/container/expensehub-cp2-web)** · **[Imagem worker](https://github.com/duduescudero/expensehub-cp2/pkgs/container/expensehub-cp2-worker)**
+
+```powershell
+./scripts/Initialize-Cp3.ps1
+docker compose pull
+docker compose up -d
+```
+
+As imagens são identificadas pelo SHA da versão; consulte a entrega/release CP3 para as evidências efetivamente capturadas. O repositório original foi restaurado; commit da CP2: `460eb83b085ebb867cd2fc945afdffb9daf5ed0c`.
+
+## Referência preservada da CP2
+
+Os comandos abaixo descrevem a base anterior. Para executar o sistema completo da CP3, utilize as instruções acima e `docs/CP3.md`.
+
 # ExpenseHub — Checkpoint 2 de C#
 
 **Aluno:** Eduardo Pires Escudero — **RM:** 556527<br>
