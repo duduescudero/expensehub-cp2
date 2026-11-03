@@ -10,4 +10,5 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.12" />
   </ItemGroup>
 
-</Project>
+<ItemGroup><Compile Remove="Domain/Models.cs" /><Compile Remove="Data/ExpenseDbContext.cs" /><ProjectReference Include="../ExpenseHub.Shared/ExpenseHub.Shared.csproj" /></ItemGroup></Project>
+

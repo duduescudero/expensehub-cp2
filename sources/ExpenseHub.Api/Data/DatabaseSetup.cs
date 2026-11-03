@@ -15,6 +15,7 @@ internal static class DatabaseSetup
         using IServiceScope scope = services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ExpenseDbContext>();
         await context.Database.EnsureCreatedAsync();
+        await ExpenseHub.Reports.ReportStore.UpgradeAsync(context);
         var roles = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         foreach (string role in Roles.All)
         {
@@ -44,3 +45,4 @@ internal static class DatabaseSetup
         }
     }
 }
+
