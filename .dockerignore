@@ -1,0 +1,10 @@
+**/bin
+**/obj
+.git
+.env
+.local
+artifacts
+evidence
+**/*.db
+**/*.db-shm
+**/*.db-wal
